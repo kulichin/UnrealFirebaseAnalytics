@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<root xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:tools="http://schemas.android.com/tools">
+
+	<!-- Copy google-services.json -->
+	<prebuildCopies>
+		<copyFile src="$S(PluginDir)/../../../../Build/Android/google-services.json"
+		          dst="$S(BuildDir)/gradle/app/google-services.json" />
+	</prebuildCopies>
+
+	<!-- AndroidManifest additions -->
+	<androidManifestUpdates>
+		<addPermission android:name="android.permission.INTERNET" />
+	</androidManifestUpdates>
+
+	<!--Enable AndroidX support-->
+	<gradleProperties>
+		<insert>
+			android.useAndroidX = true
+			android.enableJetifier = true
+		</insert>
+	</gradleProperties>
+
+	<!-- Replace supportlib imports with AndroidX in engine source files -->
+	<baseBuildGradleAdditions>
+		<insert>
+			allprojects
+			{
+				def mappings =
+				[
+					'android.arch.lifecycle.Lifecycle':                 'androidx.lifecycle.Lifecycle',
+					'android.arch.lifecycle.LifecycleObserver':         'androidx.lifecycle.LifecycleObserver',
+					'android.arch.lifecycle.OnLifecycleEvent':          'androidx.lifecycle.OnLifecycleEvent',
+					'android.arch.lifecycle.ProcessLifecycleOwner':     'androidx.lifecycle.ProcessLifecycleOwner',
+					'android.arch.lifecycle':                           'androidx.lifecycle',
+					'android.support.annotation':                       'androidx.annotation',
+					'android.support.v13.app.FragmentCompat':           'androidx.legacy.app.FragmentCompat',
+					'android.support.v4.app.ActivityCompat':            'androidx.core.app.ActivityCompat',
+					'android.support.v4.app.NotificationCompat':        'androidx.core.app.NotificationCompat',
+					'android.support.v4.app.NotificationManagerCompat': 'androidx.core.app.NotificationManagerCompat',
+					'android.support.v4.content.ContextCompat':         'androidx.core.content.ContextCompat',
+					'android.support.v4.content.FileProvider':          'androidx.core.content.FileProvider',
+				]
+
+				beforeEvaluate { project ->
+					project.rootProject.projectDir.traverse(type: groovy.io.FileType.FILES, nameFilter: ~/.*\.java$/) { f ->
+						mappings.each { entry ->
+							if (f.getText('UTF-8').contains(entry.key)) {
+								println "Updating ${entry.key} to ${entry.value} in file ${f}"
+								ant.replace(file: f, token: entry.key, value: entry.value)
+							}
+						}
+					}
+				}
+			}
+		</insert>
+	</baseBuildGradleAdditions>
+
+	<!-- Import dependencies -->
+	<AARImports>
+		<insertValue value="com.google.firebase,firebase-analytics,19.0.0" />
+		<insertNewline />
+
+		<replace find="play-services-auth,11.8.0"   with="play-services-auth,19.2.0" />
+		<replace find="play-services-games,11.8.0"  with="play-services-games,21.0.0" />
+		<replace find="play-services-nearby,11.8.0" with="play-services-nearby,18.0.0" />
+		<replace find="play-services-plus,11.8.0"   with="play-services-plus,17.0.0" />
+	</AARImports>
+
+	<!-- Gradle additions -->
+	<buildscriptGradleAdditions>
+		<insert>
+			dependencies
+			{
+				classpath 'com.google.gms:google-services:4.3.8'
+			}
+		</insert>
+	</buildscriptGradleAdditions>
+
+	<!-- Gradle additions -->
+	<buildGradleAdditions>
+		<insert>
+			apply plugin: 'com.google.gms.google-services'
+			android
+			{
+				compileOptions
+				{
+					targetCompatibility JavaVersion.VERSION_1_8
+					sourceCompatibility JavaVersion.VERSION_1_8
+				}
+			}
+		</insert>
+	</buildGradleAdditions>
+
+	<!-- Keep analytics functions -->
+	<proguardAdditions>
+		<insert>
+			-keep class com.epicgames.ue4.GameActivity 
+			{
+				void NativeInitialize(java.lang.Class);
+				void FirebaseAnalyticsInitialize();
+				void AndroidThunkJava_LogEvent(java.lang.String);
+				void AndroidThunkJava_LogEventWithParameter(java.lang.String, java.lang.String, java.lang.String);
+				void AndroidThunkJava_LogEventWithParameter(java.lang.String, java.lang.String, float);
+				void AndroidThunkJava_LogEventWithParameter(java.lang.String, java.lang.String, int);
+				void AndroidThunkJava_LogEventWithParameters(java.lang.String, android.os.Bundle);
+				void AndroidThunkJava_ResetAnalyticsData();
+				void AndroidThunkJava_SetAnalyticsCollectionEnabled(boolean);
+				void AndroidThunkJava_SetSessionTimeoutDuration(int);
+				void AndroidThunkJava_SetUserID(java.lang.String);
+				void AndroidThunkJava_SetUserProperty(java.lang.String, java.lang.String);
+				void FirebaseAnalyticsInitialize();
+			}
+		</insert>
+	</proguardAdditions>
+
+	<!-- GameActivity additions -->
+	<gameActivityImportAdditions>
+		<insert>
+			import com.google.firebase.FirebaseApp;
+			import com.google.firebase.FirebaseOptions;
+			import com.google.firebase.analytics.FirebaseAnalytics;
+		</insert>
+	</gameActivityImportAdditions>
+
+	<!-- GameActivity additions -->
+	<gameActivityClassAdditions>
+		<insert>
+			private static native void NativeInitialize(Class BundleClass);
+			private FirebaseAnalytics Analytics;
+
+			private void FirebaseAnalyticsInitialize()
+			{
+				FirebaseApp.initializeApp(this);
+				Analytics = FirebaseAnalytics.getInstance(this);
+				NativeInitialize(Bundle.class);
+			}
+
+			private void AndroidThunkJava_LogEvent(String EventName)
+			{
+				if (Analytics != null)
+				{
+					Bundle Parameters = new Bundle();
+					Analytics.logEvent(EventName, Parameters);
+				}
+			}
+
+			private void AndroidThunkJava_LogEventWithParameter(String EventName, String ParameterName, String ParameterValue)
+			{
+				if (Analytics != null)
+				{
+					Bundle Parameters = new Bundle();
+					Parameters.putString(ParameterName, ParameterValue);
+					Analytics.logEvent(EventName, Parameters);
+				}
+			}
+
+			private void AndroidThunkJava_LogEventWithParameter(String EventName, String ParameterName, float ParameterValue)
+			{
+				if (Analytics != null)
+				{
+					Bundle Parameters = new Bundle();
+					Parameters.putFloat(ParameterName, ParameterValue);
+					Analytics.logEvent(EventName, Parameters);
+				}
+			}
+
+			private void AndroidThunkJava_LogEventWithParameter(String EventName, String ParameterName, int ParameterValue)
+			{
+				if (Analytics != null)
+				{
+					Bundle Parameters = new Bundle();
+					Parameters.putInt(ParameterName, ParameterValue);
+					Analytics.logEvent(EventName, Parameters);
+				}
+			}
+
+			private void AndroidThunkJava_LogEventWithParameters(String EventName, Bundle Parameters)
+			{
+				if (Analytics != null)
+				{
+					Analytics.logEvent(EventName, Parameters);
+				}
+			}
+
+			private void AndroidThunkJava_ResetAnalyticsData()
+			{
+				if (Analytics != null)
+				{
+					Analytics.resetAnalyticsData();
+				}
+			}
+
+			private void AndroidThunkJava_SetAnalyticsCollectionEnabled(boolean Enabled)
+			{
+				if (Analytics != null)
+				{
+					Analytics.setAnalyticsCollectionEnabled(Enabled);
+				}
+			}
+
+			private void AndroidThunkJava_SetSessionTimeoutDuration(int Milliseconds)
+			{
+				if (Analytics != null)
+				{
+					Analytics.setSessionTimeoutDuration(Milliseconds);
+				}
+			}
+
+			private void AndroidThunkJava_SetUserID(String UserID)
+			{
+				if (Analytics != null)
+				{
+					Analytics.setUserId(UserID);
+				}
+			}
+
+			private void AndroidThunkJava_SetUserProperty(String PropertyName, String PropertyValue)
+			{
+				if (Analytics != null)
+				{
+					Analytics.setUserProperty(PropertyName, PropertyValue);
+				}
+			}
+		</insert>
+	</gameActivityClassAdditions>
+
+	<!-- GameActivity additions -->
+	<gameActivityOnCreateAdditions>
+		<insert>
+			FirebaseAnalyticsInitialize();
+		</insert>
+	</gameActivityOnCreateAdditions>
+</root>
