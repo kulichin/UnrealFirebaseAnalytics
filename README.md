@@ -1,1 +1,1 @@
-# UnrealFirebaseAnalytics
+# Firebase Analytics plugin
