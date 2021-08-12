@@ -1,3 +1,5 @@
+// Copyright (C) 2021. Nikita Klimov. All rights reserved.
+
 #include "FirebaseAnalyticsSubsystem.h"
 
 #if PLATFORM_ANDROID

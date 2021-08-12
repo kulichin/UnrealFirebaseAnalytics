@@ -1,3 +1,5 @@
+// Copyright (C) 2021. Nikita Klimov. All rights reserved.
+
 #pragma once
 
 #include "CoreMinimal.h"
@@ -14,7 +16,6 @@ struct FBundle
 	TMap<FString, int> IntegerParameters;
 };
 
-// TODO: add list of reserved event names
 UCLASS()
 class UFirebaseAnalyticsSubsystem : public UGameInstanceSubsystem
 {
