@@ -6,7 +6,7 @@
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "FirebaseAnalyticsSubsystem.generated.h"
 
-USTRUCT(BlueprintType, Category = "FirebaseAnalytics | Bundle")
+USTRUCT(BlueprintType)
 struct FBundle
 {
 	GENERATED_BODY()
@@ -16,10 +16,11 @@ struct FBundle
 	TMap<FString, int> IntegerParameters;
 };
 
-// TODO: "android.permission.INTERNET", "android.permission.ACCESS_NETWORK_STATE", "android.permission.WAKE_LOCK"
+// TODO: update home page
+// TODO: add predefined params
+// TODO: edit 'Log Events' wiki page
+// TODO: add 'setDefaultEventParameters'
 // TODO: add examples
-// TODO: check workability of these functions:
-//												SetSessionDurationTimeout
 UCLASS()
 class UFirebaseAnalyticsSubsystem : public UGameInstanceSubsystem
 {

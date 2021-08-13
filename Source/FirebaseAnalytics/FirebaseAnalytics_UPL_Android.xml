@@ -9,11 +9,6 @@
 		          dst="$S(BuildDir)/gradle/app/google-services.json" />
 	</prebuildCopies>
 
-	<!-- AndroidManifest additions -->
-	<androidManifestUpdates>
-		<addPermission android:name="android.permission.INTERNET" />
-	</androidManifestUpdates>
-
 	<!--Enable AndroidX support-->
 	<gradleProperties>
 		<insert>
