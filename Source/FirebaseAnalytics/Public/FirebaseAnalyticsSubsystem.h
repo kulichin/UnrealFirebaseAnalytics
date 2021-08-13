@@ -16,6 +16,7 @@ struct FBundle
 	TMap<FString, int> IntegerParameters;
 };
 
+// TODO: add some constants = https://firebase.google.com/docs/reference/android/com/google/firebase/analytics/FirebaseAnalytics.UserProperty#ALLOW_AD_PERSONALIZATION_SIGNALS
 // TODO: update home page
 // TODO: add predefined params
 // TODO: edit 'Log Events' wiki page
