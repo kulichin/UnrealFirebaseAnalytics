@@ -1,1 +1,1 @@
-# Firebase Analytics plugin
+# Firebase Analytics
