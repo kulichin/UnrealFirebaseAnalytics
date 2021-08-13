@@ -127,14 +127,14 @@
 	<!-- GameActivity additions -->
 	<gameActivityClassAdditions>
 		<insert>
-			private static native void NativeInitialize(Class BundleClass);
+			private static native void NativeInitialize();
 			private FirebaseAnalytics Analytics;
 
 			private void FirebaseAnalyticsInitialize()
 			{
 				FirebaseApp.initializeApp(this);
 				Analytics = FirebaseAnalytics.getInstance(this);
-				NativeInitialize(Bundle.class);
+				NativeInitialize();
 			}
 
 			private void AndroidThunkJava_LogEvent(String EventName)

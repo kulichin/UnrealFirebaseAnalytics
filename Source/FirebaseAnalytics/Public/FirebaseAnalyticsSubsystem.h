@@ -16,6 +16,10 @@ struct FBundle
 	TMap<FString, int> IntegerParameters;
 };
 
+// TODO: "android.permission.INTERNET", "android.permission.ACCESS_NETWORK_STATE", "android.permission.WAKE_LOCK"
+// TODO: add examples
+// TODO: check workability of these functions:
+//												SetSessionDurationTimeout
 UCLASS()
 class UFirebaseAnalyticsSubsystem : public UGameInstanceSubsystem
 {
@@ -105,7 +109,7 @@ public:
 
 	/** Sets whether analytics collection is enabled for this app on this device.
 	 *
-	 *  @param Enabled	"true" to enable analytics collection, "false" to disable.
+	 *  @param bEnabled	"true" to enable analytics collection, "false" to disable.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "FirebaseAnalytics")
 	static void SetAnalyticsCollectionEnabled(const bool bEnabled);

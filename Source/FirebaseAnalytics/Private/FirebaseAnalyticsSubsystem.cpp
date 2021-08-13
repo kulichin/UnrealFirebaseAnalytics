@@ -23,9 +23,7 @@ static jmethodID Bundle_Constructor_MethodID;
 static jmethodID Bundle_PutString_MethodID;
 static jmethodID Bundle_PutFloat_MethodID;
 static jmethodID Bundle_PutInteger_MethodID;
-
-// Classes
-static jclass BundleClass;
+jclass BundleClassID;
 
 static jmethodID FindMethodInSpecificClass(
 	JNIEnv* Env,
@@ -33,10 +31,10 @@ static jmethodID FindMethodInSpecificClass(
 	const char* Name, 
 	const char* Signature)
 {
-	if (Env && Name && Signature && Class)
-	{
+	//if (Env && Name && Signature && Class)
+	//{
 		return Env->GetMethodID(Class, Name, Signature);
-	}
+	//}
 
 	return nullptr;
 }
@@ -53,8 +51,6 @@ static jmethodID FindMethod(JNIEnv* Env, const char* Name, const char* Signature
 
 static void CallVoidMethod(JNIEnv* Env, jmethodID Method, ...)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 1000.0f, FColor::Red, FString::FromInt(Method == NULL));
-
     // make sure the function exists
 	jobject Object = FJavaWrapper::GameActivityThis;
 	if (Method == NULL || Object == NULL || Env == NULL)
@@ -171,8 +167,8 @@ void UFirebaseAnalyticsSubsystem::LogEventWithParameters(
 	if (JNIEnv* Env = FAndroidApplication::GetJavaEnv())
 	{
 		// Initialize Bundle class
-		auto JBundle = NewScopedJavaObject(Env, Env->NewObject(BundleClass, Bundle_Constructor_MethodID));
-
+		auto JBundle = NewScopedJavaObject(Env, Env->NewObject(BundleClassID, Bundle_Constructor_MethodID));
+		
 		// Adding string parameter to Bundle
 		for (auto& Parameter : Bundle.StringParameters)
 		{
@@ -310,8 +306,7 @@ void UFirebaseAnalyticsSubsystem::PutInteger(
 
 JNI_METHOD void Java_com_epicgames_ue4_GameActivity_NativeInitialize(
 	JNIEnv* Env,
-	jobject Thiz,
-	jclass ToBundleClass)
+	jobject Thiz)
 {
 	// Find methods in game activity
     LogEvent_MethodID						= FindMethod(Env, "AndroidThunkJava_LogEvent",						"(Ljava/lang/String;)V");
@@ -325,14 +320,12 @@ JNI_METHOD void Java_com_epicgames_ue4_GameActivity_NativeInitialize(
     SetUserID_MethodID						= FindMethod(Env, "AndroidThunkJava_SetUserID",						"(Ljava/lang/String;)V");
     SetUserProperty_MethodID				= FindMethod(Env, "AndroidThunkJava_SetUserProperty",				"(Ljava/lang/String;Ljava/lang/String;)V");
 
-	// Find methods in bundle
-	Bundle_Constructor_MethodID				= FindMethodInSpecificClass(Env, ToBundleClass, "<init>",			"()V");
-	Bundle_PutString_MethodID				= FindMethodInSpecificClass(Env, ToBundleClass, "putString",		"(Ljava/lang/String;Ljava/lang/String;)V");
-	Bundle_PutFloat_MethodID				= FindMethodInSpecificClass(Env, ToBundleClass, "putFloat",			"(Ljava/lang/String;F)V");
-	Bundle_PutInteger_MethodID				= FindMethodInSpecificClass(Env, ToBundleClass, "putInt",			"(Ljava/lang/String;I)V");
-
-	// Initialize local bundle class id
-	BundleClass = ToBundleClass;
+	// Find methods in Bundle class
+	BundleClassID							= FJavaWrapper::FindClassGlobalRef(Env, "android/os/Bundle", false);
+	Bundle_Constructor_MethodID				= FindMethodInSpecificClass(Env, BundleClassID, "<init>",			"()V");
+	Bundle_PutString_MethodID				= FindMethodInSpecificClass(Env, BundleClassID, "putString",		"(Ljava/lang/String;Ljava/lang/String;)V");
+	Bundle_PutFloat_MethodID				= FindMethodInSpecificClass(Env, BundleClassID, "putFloat",			"(Ljava/lang/String;F)V");
+	Bundle_PutInteger_MethodID				= FindMethodInSpecificClass(Env, BundleClassID, "putInt",			"(Ljava/lang/String;I)V");
 }
 
 #endif
