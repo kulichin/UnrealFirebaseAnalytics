@@ -6,6 +6,126 @@
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "FirebaseAnalyticsSubsystem.generated.h"
 
+UENUM(Blueprintable)
+enum EBuiltinParamNames
+{
+	ACHIEVEMENT_ID,
+	ACLID,
+	AD_FORMAT,
+	AD_PLATFORM,
+	AD_SOURCE,
+	AD_UNIT_NAME,
+	AFFILIATION	,
+	CAMPAIGN,
+	CHARACTER,
+	CHECKOUT_OPTION,
+	CHECKOUT_STEP,
+	CONTENT,
+	CONTENT_TYPE,
+	COUPON,
+	CP1,
+	CREATIVE_NAME,
+	CREATIVE_SLOT,
+	CURRENCY,
+	DESTINATION,
+	DISCOUNT,
+	END_DATE,
+	EXTEND_SESSION,
+	FLIGHT_NUMBER,
+	GROUP_ID,
+	INDEX,
+	ITEMS,
+	ITEM_BRAND,
+	ITEM_CATEGORY,
+	ITEM_CATEGORY2,
+	ITEM_CATEGORY3,
+	ITEM_CATEGORY4,
+	ITEM_CATEGORY5,
+	ITEM_ID,
+	ITEM_LIST,
+	ITEM_LIST_ID,
+	ITEM_LIST_NAME,
+	ITEM_LOCATION_ID,
+	ITEM_NAME,
+	ITEM_VARIANT,
+	LEVEL,
+	LEVEL_NAME,
+	LOCATION,
+	LOCATION_ID,
+	MEDIUM,
+	METHOD,
+	NUMBER_OF_NIGHTS,
+	NUMBER_OF_PASSENGERS,
+	NUMBER_OF_ROOMS,
+	ORIGIN,
+	PAYMENT_TYPE,
+	PRICE,
+	PROMOTION_ID,
+	PROMOTION_NAME,
+	QUANTITY,
+	SCORE,
+	SCREEN_CLASS,
+	SCREEN_NAME,
+	SEARCH_TERM,
+	SHIPPING,
+	SHIPPING_TIER,
+	SIGN_UP_METHOD,
+	SOURCE,
+	START_DATE,
+	SUCCESS,
+	TAX,
+	TERM,
+	TRANSACTION_ID,
+	TRAVEL_CLASS,
+	VALUE,
+	VIRTUAL_CURRENCY_NAME,
+};
+
+UENUM(Blueprintable)
+enum EBuiltinEventNames
+{
+	ADD_PAYMENT_INFO,
+	ADD_SHIPPING_INFO,
+	ADD_TO_CART,
+	ADD_TO_WISHLIST,
+	AD_IMPRESSION,
+	APP_OPEN,
+	BEGIN_CHECKOUT,
+	CAMPAIGN_DETAILS,
+	CHECKOUT_PROGRESS,
+	EARN_VIRTUAL_CURRENCY,
+	ECOMMERCE_PURCHASE,
+	GENERATE_LEAD,
+	JOIN_GROUP,
+	LEVEL_END,
+	LEVEL_START,
+	LEVEL_UP,
+	LOGIN,
+	POST_SCORE,
+	PRESENT_OFFER,
+	PURCHASE,
+	PURCHASE_REFUND,
+	REFUND,
+	REMOVE_FROM_CART,
+	SCREEN_VIEW,
+	SEARCH,
+	SELECT_CONTENT,
+	SELECT_ITEM,
+	SELECT_PROMOTION,
+	SET_CHECKOUT_OPTION,
+	SHARE,
+	SIGN_UP,
+	SPEND_VIRTUAL_CURRENCY,
+	TUTORIAL_BEGIN,
+	TUTORIAL_COMPLETE,
+	UNLOCK_ACHIEVEMENT,
+	VIEW_CART,
+	VIEW_ITEM,
+	VIEW_ITEM_LIST,
+	VIEW_PROMOTION,
+	VIEW_SEARCH_RESULTS,
+};
+
 USTRUCT(BlueprintType)
 struct FBundle
 {
@@ -16,11 +136,14 @@ struct FBundle
 	TMap<FString, int> IntegerParameters;
 };
 
-// TODO: add some constants = https://firebase.google.com/docs/reference/android/com/google/firebase/analytics/FirebaseAnalytics.UserProperty#ALLOW_AD_PERSONALIZATION_SIGNALS
-// TODO: update home page
-// TODO: add predefined params
-// TODO: edit 'Log Events' wiki page
-// TODO: add 'setDefaultEventParameters'
+// TODO: finish up:
+//					Measure Ecommerce
+//					Log events
+//					Configure Analytics Data Collection and Usage
+//					Home
+//					README
+
+// TODO: add 'SetDefaultEventParameters'
 // TODO: add examples
 UCLASS()
 class UFirebaseAnalyticsSubsystem : public UGameInstanceSubsystem
@@ -181,4 +304,14 @@ public:
 		UPARAM(ref) FBundle& Bundle, 
 		const FString& ParameterName, 
 		const int ParameterValue);
+
+	/** Return a built-in event names.
+	 */
+	UFUNCTION(BlueprintCallable, Category="FirebaseAnalytics")
+	static TMap<TEnumAsByte<EBuiltinEventNames>, FName> GetBuiltinEventNames();
+
+	/** Return a built-in param names.
+	 */
+	UFUNCTION(BlueprintCallable, Category="FirebaseAnalytics")
+	static TMap<TEnumAsByte<EBuiltinParamNames>, FName> GetBuiltinParamNames();
 };

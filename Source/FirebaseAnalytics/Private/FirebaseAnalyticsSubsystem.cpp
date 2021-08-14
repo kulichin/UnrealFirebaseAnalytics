@@ -302,6 +302,130 @@ void UFirebaseAnalyticsSubsystem::PutInteger(
 	Bundle.IntegerParameters.Add(ParameterName, ParameterValue);
 }
 
+TMap<TEnumAsByte<EBuiltinEventNames>, FName> UFirebaseAnalyticsSubsystem::GetBuiltinEventNames()
+{
+	TMap<TEnumAsByte<EBuiltinEventNames>, FName> BuiltinNames;
+	BuiltinNames.Add(ADD_PAYMENT_INFO,		"add_payment_info");
+	BuiltinNames.Add(ADD_SHIPPING_INFO,		"add_shipping_info");
+	BuiltinNames.Add(ADD_TO_CART,				"add_to_cart");
+	BuiltinNames.Add(ADD_TO_WISHLIST,			"add_to_wishlist");
+	BuiltinNames.Add(AD_IMPRESSION,			"ad_impression");
+	BuiltinNames.Add(APP_OPEN,				"app_open");
+	BuiltinNames.Add(BEGIN_CHECKOUT,			"begin_checkout");
+	BuiltinNames.Add(CAMPAIGN_DETAILS,		"campaign_details");
+	BuiltinNames.Add(CHECKOUT_PROGRESS,		"checkout_progress");
+	BuiltinNames.Add(EARN_VIRTUAL_CURRENCY,	"earn_virtual_currency");
+	BuiltinNames.Add(ECOMMERCE_PURCHASE,		"ecommerce_purchase");
+	BuiltinNames.Add(GENERATE_LEAD,			"generate_lead");
+	BuiltinNames.Add(JOIN_GROUP,				"join_group");
+	BuiltinNames.Add(LEVEL_END,				"level_end");
+	BuiltinNames.Add(LEVEL_START,				"level_start");
+	BuiltinNames.Add(LEVEL_UP,				"level_up");
+	BuiltinNames.Add(LOGIN,					"login");
+	BuiltinNames.Add(POST_SCORE,				"post_score");
+	BuiltinNames.Add(PRESENT_OFFER,			"present_offer");
+	BuiltinNames.Add(PURCHASE,				"purchase");
+	BuiltinNames.Add(PURCHASE_REFUND,			"purchase_refund");
+	BuiltinNames.Add(REFUND,					"refund");
+	BuiltinNames.Add(REMOVE_FROM_CART,		"remove_from_cart");
+	BuiltinNames.Add(SCREEN_VIEW,				"screen_view");
+	BuiltinNames.Add(SEARCH,					"search");
+	BuiltinNames.Add(SELECT_CONTENT,			"select_content");
+	BuiltinNames.Add(SELECT_ITEM,				"select_item");
+	BuiltinNames.Add(SELECT_PROMOTION,		"select_promotion");
+	BuiltinNames.Add(SET_CHECKOUT_OPTION,		"set_checkout_option");
+	BuiltinNames.Add(SHARE,					"share");
+	BuiltinNames.Add(SIGN_UP,					"sign_up");
+	BuiltinNames.Add(SPEND_VIRTUAL_CURRENCY,	"spend_virtual_currency");
+	BuiltinNames.Add(TUTORIAL_BEGIN,			"tutorial_begin");
+	BuiltinNames.Add(TUTORIAL_COMPLETE,		"tutorial_complete");
+	BuiltinNames.Add(UNLOCK_ACHIEVEMENT,		"unlock_achievement");
+	BuiltinNames.Add(VIEW_CART,				"view_cart");
+	BuiltinNames.Add(VIEW_ITEM,				"view_item");
+	BuiltinNames.Add(VIEW_ITEM_LIST,			"view_item_list");
+	BuiltinNames.Add(VIEW_PROMOTION,			"view_promotion");
+	BuiltinNames.Add(VIEW_SEARCH_RESULTS,		"view_search_results");
+
+	return BuiltinNames;
+}
+
+TMap<TEnumAsByte<EBuiltinParamNames>, FName> UFirebaseAnalyticsSubsystem::GetBuiltinParamNames()
+{
+	TMap<TEnumAsByte<EBuiltinParamNames>, FName> BuiltinNames;
+	BuiltinNames.Add(ACHIEVEMENT_ID,			"achievement_id");
+	BuiltinNames.Add(ACLID,					"aclid");
+	BuiltinNames.Add(AD_FORMAT,				"ad_format");
+	BuiltinNames.Add(AD_PLATFORM,				"ad_platform");
+	BuiltinNames.Add(AD_SOURCE,				"ad_source");
+	BuiltinNames.Add(AD_UNIT_NAME,			"ad_unit_name");
+	BuiltinNames.Add(AFFILIATION,				"affiliation");
+	BuiltinNames.Add(CAMPAIGN,				"campaign");
+	BuiltinNames.Add(CHARACTER,				"character");
+	BuiltinNames.Add(CHECKOUT_OPTION,			"checkout_option");
+	BuiltinNames.Add(CHECKOUT_STEP,			"checkout_step");
+	BuiltinNames.Add(CONTENT,					"content");
+	BuiltinNames.Add(CONTENT_TYPE,			"content_type");
+	BuiltinNames.Add(COUPON,					"coupon");
+	BuiltinNames.Add(CP1,						"cp1");
+	BuiltinNames.Add(CREATIVE_NAME,			"creative_name");
+	BuiltinNames.Add(CREATIVE_SLOT,			"creative_slot");
+	BuiltinNames.Add(CURRENCY,				"currency");
+	BuiltinNames.Add(DESTINATION,				"destination");
+	BuiltinNames.Add(DISCOUNT,				"discount");
+	BuiltinNames.Add(END_DATE,				"end_date");
+	BuiltinNames.Add(EXTEND_SESSION,			"extend_session");
+	BuiltinNames.Add(FLIGHT_NUMBER,			"flight_number");
+	BuiltinNames.Add(GROUP_ID,				"group_id");
+	BuiltinNames.Add(INDEX,					"index");
+	BuiltinNames.Add(ITEMS,					"items");
+	BuiltinNames.Add(ITEM_BRAND,				"item_brand");
+	BuiltinNames.Add(ITEM_CATEGORY,			"item_category");
+	BuiltinNames.Add(ITEM_CATEGORY2,			"item_category2");
+	BuiltinNames.Add(ITEM_CATEGORY3,			"item_category3");
+	BuiltinNames.Add(ITEM_CATEGORY4,			"item_category4");
+	BuiltinNames.Add(ITEM_CATEGORY5,			"item_category5");
+	BuiltinNames.Add(ITEM_ID,					"item_id");
+	BuiltinNames.Add(ITEM_LIST,				"item_list");
+	BuiltinNames.Add(ITEM_LIST_ID,			"item_list_id");
+	BuiltinNames.Add(ITEM_LIST_NAME,			"item_list_name");
+	BuiltinNames.Add(ITEM_LOCATION_ID,		"item_location_id");
+	BuiltinNames.Add(ITEM_NAME,				"item_name");
+	BuiltinNames.Add(ITEM_VARIANT,			"item_variant");
+	BuiltinNames.Add(LEVEL,					"level");
+	BuiltinNames.Add(LEVEL_NAME,				"level_name");
+	BuiltinNames.Add(LOCATION,				"location");
+	BuiltinNames.Add(LOCATION_ID,				"location_id");
+	BuiltinNames.Add(MEDIUM,					"medium");
+	BuiltinNames.Add(METHOD,					"method");
+	BuiltinNames.Add(NUMBER_OF_NIGHTS,		"number_of_nights");
+	BuiltinNames.Add(NUMBER_OF_PASSENGERS,	"number_of_passengers");
+	BuiltinNames.Add(NUMBER_OF_ROOMS,			"number_of_rooms");
+	BuiltinNames.Add(ORIGIN,					"origin");
+	BuiltinNames.Add(PAYMENT_TYPE,			"payment_type");
+	BuiltinNames.Add(PRICE,					"price");
+	BuiltinNames.Add(PROMOTION_ID,			"promotion_id");
+	BuiltinNames.Add(PROMOTION_NAME,			"promotion_name");
+	BuiltinNames.Add(QUANTITY,				"quantity");
+	BuiltinNames.Add(SCORE,					"score");
+	BuiltinNames.Add(SCREEN_CLASS,			"screen_class");
+	BuiltinNames.Add(SCREEN_NAME,				"screen_name");
+	BuiltinNames.Add(SEARCH_TERM,				"search_term");
+	BuiltinNames.Add(SHIPPING,				"shipping");
+	BuiltinNames.Add(SHIPPING_TIER,			"shipping_tier");
+	BuiltinNames.Add(SIGN_UP_METHOD,			"sign_up_method");
+	BuiltinNames.Add(SOURCE,					"source");
+	BuiltinNames.Add(START_DATE,				"start_date");
+	BuiltinNames.Add(SUCCESS,					"success");
+	BuiltinNames.Add(TAX,						"tax");
+	BuiltinNames.Add(TERM,					"term");
+	BuiltinNames.Add(TRANSACTION_ID,			"transaction_id");
+	BuiltinNames.Add(TRAVEL_CLASS,			"travel_class");
+	BuiltinNames.Add(VALUE,					"value");
+	BuiltinNames.Add(VIRTUAL_CURRENCY_NAME,	"virtual_currency_name");
+
+	return BuiltinNames;
+}
+
 #if PLATFORM_ANDROID
 
 JNI_METHOD void Java_com_epicgames_ue4_GameActivity_NativeInitialize(
