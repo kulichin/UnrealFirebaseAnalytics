@@ -140,7 +140,6 @@ struct FBundle
 // TODO: finish up:
 //					Measure Ecommerce
 //					Log events
-//					Configure Analytics Data Collection and Usage
 //					Home
 //					README
 
