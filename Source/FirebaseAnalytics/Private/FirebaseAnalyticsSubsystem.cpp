@@ -24,7 +24,9 @@ static jmethodID Bundle_Constructor_MethodID;
 static jmethodID Bundle_PutString_MethodID;
 static jmethodID Bundle_PutFloat_MethodID;
 static jmethodID Bundle_PutInteger_MethodID;
+static jmethodID Bundle_PutParcelableArray_MethodID;
 jclass BundleClassID;
+jclass ParcelableClassID;
 
 static jmethodID FindMethodInSpecificClass(
 	JNIEnv* Env,
@@ -80,6 +82,87 @@ static void CallVoidObjectMethod(
 	va_start(Args, Method);
 	Env->CallVoidMethodV(Object, Method, Args);
 	va_end(Args);
+}
+
+static jobject ConvertBundleToJavaBundle(
+	JNIEnv* Env,
+	const FBundle& Bundle 
+)
+{
+	// Initialize Bundle class
+	auto JBundle = Env->NewObject(BundleClassID, Bundle_Constructor_MethodID);
+	
+	// Adding string parameter to Bundle
+	for (auto& Parameter : Bundle.StringParameters)
+	{
+	    auto ParameterName = FJavaHelper::ToJavaString(Env, Parameter.Key);
+	    auto ParameterValue = FJavaHelper::ToJavaString(Env, Parameter.Value);
+		
+		CallVoidObjectMethod(
+			Env, 
+			JBundle, 
+			Bundle_PutString_MethodID, 
+			*ParameterName, 
+			*ParameterValue);
+	}
+
+	// Adding float parameter to Bundle
+	for (auto& Parameter : Bundle.FloatParameters)
+	{
+	    auto ParameterName = FJavaHelper::ToJavaString(Env, Parameter.Key);
+		CallVoidObjectMethod(
+			Env, 
+			JBundle, 
+			Bundle_PutFloat_MethodID, 
+			*ParameterName, 
+			Parameter.Value);
+	}
+
+	// Adding integer parameter to Bundle
+	for (auto& Parameter : Bundle.IntegerParameters)
+	{
+	    auto ParameterName = FJavaHelper::ToJavaString(Env, Parameter.Key);
+		CallVoidObjectMethod(
+			Env, 
+			JBundle, 
+			Bundle_PutInteger_MethodID, 
+			*ParameterName, 
+			Parameter.Value);
+	}
+
+	// Adding bundles parameters to 'JBundle'
+	const auto& BundlesParameters = Bundle.BundlesParameters;
+	for (const auto& BundleParameter : BundlesParameters)
+	{
+		const auto JParameterName = FJavaHelper::ToJavaString(Env, BundleParameter.Key);
+		const TArray<FBundle> BundlesArray = BundleParameter.Value;
+		const int BundlesArraySize = BundlesArray.Num();
+
+		// Create 'Parcelable' java array
+		auto JParcelableArray = NewScopedJavaObject(
+			Env,
+			(jobjectArray)Env->NewObjectArray(
+				BundlesArraySize,
+				ParcelableClassID,
+				NULL));
+
+		// Put bundles to 'JParcelableArray'
+		for (int Idx = 0; Idx < BundlesArraySize; Idx++)
+		{
+			auto JTempBundle = NewScopedJavaObject(Env, ConvertBundleToJavaBundle(Env, BundlesArray[Idx]));
+			Env->SetObjectArrayElement(*JParcelableArray, Idx, *JTempBundle);
+		}
+
+		// Finally put array of 'JParcelableArray' as parameter to 'JBundle'
+		CallVoidObjectMethod(
+			Env,
+			JBundle,
+			Bundle_PutParcelableArray_MethodID,
+			*JParameterName,
+			*JParcelableArray);
+	}
+
+	return JBundle;
 }
 
 #endif
@@ -167,48 +250,9 @@ void UFirebaseAnalyticsSubsystem::LogEventWithParameters(
 #if PLATFORM_ANDROID
 	if (JNIEnv* Env = FAndroidApplication::GetJavaEnv())
 	{
-		// Initialize Bundle class
-		auto JBundle = NewScopedJavaObject(Env, Env->NewObject(BundleClassID, Bundle_Constructor_MethodID));
-		
-		// Adding string parameter to Bundle
-		for (auto& Parameter : Bundle.StringParameters)
-		{
-		    auto ParameterName = FJavaHelper::ToJavaString(Env, Parameter.Key);
-		    auto ParameterValue = FJavaHelper::ToJavaString(Env, Parameter.Value);
-			
-			CallVoidObjectMethod(
-				Env, 
-				*JBundle, 
-				Bundle_PutString_MethodID, 
-				*ParameterName, 
-				*ParameterValue);
-		}
-
-		// Adding float parameter to Bundle
-		for (auto& Parameter : Bundle.FloatParameters)
-		{
-		    auto ParameterName = FJavaHelper::ToJavaString(Env, Parameter.Key);
-			CallVoidObjectMethod(
-				Env, 
-				*JBundle, 
-				Bundle_PutFloat_MethodID, 
-				*ParameterName, 
-				Parameter.Value);
-		}
-
-		// Adding integer parameter to Bundle
-		for (auto& Parameter : Bundle.IntegerParameters)
-		{
-		    auto ParameterName = FJavaHelper::ToJavaString(Env, Parameter.Key);
-			CallVoidObjectMethod(
-				Env, 
-				*JBundle, 
-				Bundle_PutInteger_MethodID, 
-				*ParameterName, 
-				Parameter.Value);
-		}
-		
+		auto JBundle = NewScopedJavaObject(Env, ConvertBundleToJavaBundle(Env, Bundle));
 		auto JEventName = FJavaHelper::ToJavaString(Env, EventName);
+		
 		CallVoidMethod(
 			Env, 
 			LogEventWithParameters_MethodID,
@@ -284,51 +328,7 @@ void UFirebaseAnalyticsSubsystem::SetDefaultEventParameters(const FBundle& Bundl
 #if PLATFORM_ANDROID
 	if (JNIEnv* Env = FAndroidApplication::GetJavaEnv())
 	{
-		// Initialize Bundle class
-		auto JBundle = NewScopedJavaObject(Env, Env->NewObject(BundleClassID, Bundle_Constructor_MethodID));
-
-		GEngine->AddOnScreenDebugMessage(-1, 1000.0f, FColor::Red, FString::FromInt(Bundle.StringParameters.Num()));
-		GEngine->AddOnScreenDebugMessage(-1, 1000.0f, FColor::Red, FString::FromInt(Bundle.FloatParameters.Num()));
-		GEngine->AddOnScreenDebugMessage(-1, 1000.0f, FColor::Red, FString::FromInt(Bundle.IntegerParameters.Num()));
-		
-		// Adding string parameter to Bundle
-		for (auto& Parameter : Bundle.StringParameters)
-		{
-		    auto ParameterName = FJavaHelper::ToJavaString(Env, Parameter.Key);
-		    auto ParameterValue = FJavaHelper::ToJavaString(Env, Parameter.Value);
-			
-			CallVoidObjectMethod(
-				Env, 
-				*JBundle, 
-				Bundle_PutString_MethodID, 
-				*ParameterName, 
-				*ParameterValue);
-		}
-
-		// Adding float parameter to Bundle
-		for (auto& Parameter : Bundle.FloatParameters)
-		{
-		    auto ParameterName = FJavaHelper::ToJavaString(Env, Parameter.Key);
-			CallVoidObjectMethod(
-				Env, 
-				*JBundle, 
-				Bundle_PutFloat_MethodID, 
-				*ParameterName, 
-				Parameter.Value);
-		}
-
-		// Adding integer parameter to Bundle
-		for (auto& Parameter : Bundle.IntegerParameters)
-		{
-		    auto ParameterName = FJavaHelper::ToJavaString(Env, Parameter.Key);
-			CallVoidObjectMethod(
-				Env, 
-				*JBundle, 
-				Bundle_PutInteger_MethodID, 
-				*ParameterName, 
-				Parameter.Value);
-		}
-		
+		auto JBundle = NewScopedJavaObject(Env, ConvertBundleToJavaBundle(Env, Bundle));
 		CallVoidMethod(
 			Env, 
 			SetDefaultEventParameters_MethodID,
@@ -339,7 +339,7 @@ void UFirebaseAnalyticsSubsystem::SetDefaultEventParameters(const FBundle& Bundl
 }
 
 void UFirebaseAnalyticsSubsystem::PutString(
-	UPARAM(ref) FBundle& Bundle, 
+	FBundle& Bundle, 
 	const FString& ParameterName, 
 	const FString& ParameterValue)
 {
@@ -347,7 +347,7 @@ void UFirebaseAnalyticsSubsystem::PutString(
 }
 
 void UFirebaseAnalyticsSubsystem::PutFloat(
-	UPARAM(ref) FBundle& Bundle, 
+	FBundle& Bundle, 
 	const FString& ParameterName, 
 	const float ParameterValue)
 {
@@ -355,130 +355,138 @@ void UFirebaseAnalyticsSubsystem::PutFloat(
 }
 
 void UFirebaseAnalyticsSubsystem::PutInteger(
-	UPARAM(ref) FBundle& Bundle, 
+	FBundle& Bundle, 
 	const FString& ParameterName, 
 	const int ParameterValue)
 {
 	Bundle.IntegerParameters.Add(ParameterName, ParameterValue);
 }
 
-TMap<TEnumAsByte<EBuiltinEventNames>, FName> UFirebaseAnalyticsSubsystem::GetBuiltinEventNames()
+void UFirebaseAnalyticsSubsystem::PutBundles(
+	FBundle& Bundle,
+	const FString& ParameterName,
+	const TArray<FBundle>& ParameterValue)
 {
-	TMap<TEnumAsByte<EBuiltinEventNames>, FName> BuiltinNames;
+	Bundle.BundlesParameters.Add(ParameterName, ParameterValue);
+}
+
+TMap<TEnumAsByte<EBuiltinEventNames>, FString> UFirebaseAnalyticsSubsystem::GetBuiltinEventNames()
+{
+	TMap<TEnumAsByte<EBuiltinEventNames>, FString> BuiltinNames;
 	BuiltinNames.Add(ADD_PAYMENT_INFO,		"add_payment_info");
 	BuiltinNames.Add(ADD_SHIPPING_INFO,		"add_shipping_info");
-	BuiltinNames.Add(ADD_TO_CART,				"add_to_cart");
-	BuiltinNames.Add(ADD_TO_WISHLIST,			"add_to_wishlist");
+	BuiltinNames.Add(ADD_TO_CART,			"add_to_cart");
+	BuiltinNames.Add(ADD_TO_WISHLIST,		"add_to_wishlist");
 	BuiltinNames.Add(AD_IMPRESSION,			"ad_impression");
 	BuiltinNames.Add(APP_OPEN,				"app_open");
-	BuiltinNames.Add(BEGIN_CHECKOUT,			"begin_checkout");
+	BuiltinNames.Add(BEGIN_CHECKOUT,		"begin_checkout");
 	BuiltinNames.Add(CAMPAIGN_DETAILS,		"campaign_details");
 	BuiltinNames.Add(CHECKOUT_PROGRESS,		"checkout_progress");
 	BuiltinNames.Add(EARN_VIRTUAL_CURRENCY,	"earn_virtual_currency");
-	BuiltinNames.Add(ECOMMERCE_PURCHASE,		"ecommerce_purchase");
+	BuiltinNames.Add(ECOMMERCE_PURCHASE,	"ecommerce_purchase");
 	BuiltinNames.Add(GENERATE_LEAD,			"generate_lead");
-	BuiltinNames.Add(JOIN_GROUP,				"join_group");
+	BuiltinNames.Add(JOIN_GROUP,			"join_group");
 	BuiltinNames.Add(LEVEL_END,				"level_end");
-	BuiltinNames.Add(LEVEL_START,				"level_start");
+	BuiltinNames.Add(LEVEL_START,			"level_start");
 	BuiltinNames.Add(LEVEL_UP,				"level_up");
 	BuiltinNames.Add(LOGIN,					"login");
-	BuiltinNames.Add(POST_SCORE,				"post_score");
+	BuiltinNames.Add(POST_SCORE,			"post_score");
 	BuiltinNames.Add(PRESENT_OFFER,			"present_offer");
 	BuiltinNames.Add(PURCHASE,				"purchase");
-	BuiltinNames.Add(PURCHASE_REFUND,			"purchase_refund");
-	BuiltinNames.Add(REFUND,					"refund");
+	BuiltinNames.Add(PURCHASE_REFUND,		"purchase_refund");
+	BuiltinNames.Add(REFUND,				"refund");
 	BuiltinNames.Add(REMOVE_FROM_CART,		"remove_from_cart");
-	BuiltinNames.Add(SCREEN_VIEW,				"screen_view");
-	BuiltinNames.Add(SEARCH,					"search");
-	BuiltinNames.Add(SELECT_CONTENT,			"select_content");
-	BuiltinNames.Add(SELECT_ITEM,				"select_item");
+	BuiltinNames.Add(SCREEN_VIEW,			"screen_view");
+	BuiltinNames.Add(SEARCH,				"search");
+	BuiltinNames.Add(SELECT_CONTENT,		"select_content");
+	BuiltinNames.Add(SELECT_ITEM,			"select_item");
 	BuiltinNames.Add(SELECT_PROMOTION,		"select_promotion");
-	BuiltinNames.Add(SET_CHECKOUT_OPTION,		"set_checkout_option");
+	BuiltinNames.Add(SET_CHECKOUT_OPTION,	"set_checkout_option");
 	BuiltinNames.Add(SHARE,					"share");
-	BuiltinNames.Add(SIGN_UP,					"sign_up");
-	BuiltinNames.Add(SPEND_VIRTUAL_CURRENCY,	"spend_virtual_currency");
-	BuiltinNames.Add(TUTORIAL_BEGIN,			"tutorial_begin");
+	BuiltinNames.Add(SIGN_UP,				"sign_up");
+	BuiltinNames.Add(SPEND_VIRTUAL_CURRENCY,"spend_virtual_currency");
+	BuiltinNames.Add(TUTORIAL_BEGIN,		"tutorial_begin");
 	BuiltinNames.Add(TUTORIAL_COMPLETE,		"tutorial_complete");
-	BuiltinNames.Add(UNLOCK_ACHIEVEMENT,		"unlock_achievement");
+	BuiltinNames.Add(UNLOCK_ACHIEVEMENT,	"unlock_achievement");
 	BuiltinNames.Add(VIEW_CART,				"view_cart");
 	BuiltinNames.Add(VIEW_ITEM,				"view_item");
-	BuiltinNames.Add(VIEW_ITEM_LIST,			"view_item_list");
-	BuiltinNames.Add(VIEW_PROMOTION,			"view_promotion");
-	BuiltinNames.Add(VIEW_SEARCH_RESULTS,		"view_search_results");
+	BuiltinNames.Add(VIEW_ITEM_LIST,		"view_item_list");
+	BuiltinNames.Add(VIEW_PROMOTION,		"view_promotion");
+	BuiltinNames.Add(VIEW_SEARCH_RESULTS,	"view_search_results");
 
 	return BuiltinNames;
 }
 
-TMap<TEnumAsByte<EBuiltinParamNames>, FName> UFirebaseAnalyticsSubsystem::GetBuiltinParamNames()
+TMap<TEnumAsByte<EBuiltinParamNames>, FString> UFirebaseAnalyticsSubsystem::GetBuiltinParamNames()
 {
-	TMap<TEnumAsByte<EBuiltinParamNames>, FName> BuiltinNames;
-	BuiltinNames.Add(ACHIEVEMENT_ID,			"achievement_id");
+	TMap<TEnumAsByte<EBuiltinParamNames>, FString> BuiltinNames;
+	BuiltinNames.Add(ACHIEVEMENT_ID,		"achievement_id");
 	BuiltinNames.Add(ACLID,					"aclid");
 	BuiltinNames.Add(AD_FORMAT,				"ad_format");
-	BuiltinNames.Add(AD_PLATFORM,				"ad_platform");
+	BuiltinNames.Add(AD_PLATFORM,			"ad_platform");
 	BuiltinNames.Add(AD_SOURCE,				"ad_source");
 	BuiltinNames.Add(AD_UNIT_NAME,			"ad_unit_name");
-	BuiltinNames.Add(AFFILIATION,				"affiliation");
+	BuiltinNames.Add(AFFILIATION,			"affiliation");
 	BuiltinNames.Add(CAMPAIGN,				"campaign");
 	BuiltinNames.Add(CHARACTER,				"character");
-	BuiltinNames.Add(CHECKOUT_OPTION,			"checkout_option");
+	BuiltinNames.Add(CHECKOUT_OPTION,		"checkout_option");
 	BuiltinNames.Add(CHECKOUT_STEP,			"checkout_step");
-	BuiltinNames.Add(CONTENT,					"content");
+	BuiltinNames.Add(CONTENT,				"content");
 	BuiltinNames.Add(CONTENT_TYPE,			"content_type");
-	BuiltinNames.Add(COUPON,					"coupon");
-	BuiltinNames.Add(CP1,						"cp1");
+	BuiltinNames.Add(COUPON,				"coupon");
+	BuiltinNames.Add(CP1,					"cp1");
 	BuiltinNames.Add(CREATIVE_NAME,			"creative_name");
 	BuiltinNames.Add(CREATIVE_SLOT,			"creative_slot");
 	BuiltinNames.Add(CURRENCY,				"currency");
-	BuiltinNames.Add(DESTINATION,				"destination");
+	BuiltinNames.Add(DESTINATION,			"destination");
 	BuiltinNames.Add(DISCOUNT,				"discount");
 	BuiltinNames.Add(END_DATE,				"end_date");
-	BuiltinNames.Add(EXTEND_SESSION,			"extend_session");
+	BuiltinNames.Add(EXTEND_SESSION,		"extend_session");
 	BuiltinNames.Add(FLIGHT_NUMBER,			"flight_number");
 	BuiltinNames.Add(GROUP_ID,				"group_id");
 	BuiltinNames.Add(INDEX,					"index");
 	BuiltinNames.Add(ITEMS,					"items");
-	BuiltinNames.Add(ITEM_BRAND,				"item_brand");
+	BuiltinNames.Add(ITEM_BRAND,			"item_brand");
 	BuiltinNames.Add(ITEM_CATEGORY,			"item_category");
-	BuiltinNames.Add(ITEM_CATEGORY2,			"item_category2");
-	BuiltinNames.Add(ITEM_CATEGORY3,			"item_category3");
-	BuiltinNames.Add(ITEM_CATEGORY4,			"item_category4");
-	BuiltinNames.Add(ITEM_CATEGORY5,			"item_category5");
-	BuiltinNames.Add(ITEM_ID,					"item_id");
+	BuiltinNames.Add(ITEM_CATEGORY2,		"item_category2");
+	BuiltinNames.Add(ITEM_CATEGORY3,		"item_category3");
+	BuiltinNames.Add(ITEM_CATEGORY4,		"item_category4");
+	BuiltinNames.Add(ITEM_CATEGORY5,		"item_category5");
+	BuiltinNames.Add(ITEM_ID,				"item_id");
 	BuiltinNames.Add(ITEM_LIST,				"item_list");
 	BuiltinNames.Add(ITEM_LIST_ID,			"item_list_id");
-	BuiltinNames.Add(ITEM_LIST_NAME,			"item_list_name");
+	BuiltinNames.Add(ITEM_LIST_NAME,		"item_list_name");
 	BuiltinNames.Add(ITEM_LOCATION_ID,		"item_location_id");
 	BuiltinNames.Add(ITEM_NAME,				"item_name");
 	BuiltinNames.Add(ITEM_VARIANT,			"item_variant");
 	BuiltinNames.Add(LEVEL,					"level");
-	BuiltinNames.Add(LEVEL_NAME,				"level_name");
+	BuiltinNames.Add(LEVEL_NAME,			"level_name");
 	BuiltinNames.Add(LOCATION,				"location");
-	BuiltinNames.Add(LOCATION_ID,				"location_id");
-	BuiltinNames.Add(MEDIUM,					"medium");
-	BuiltinNames.Add(METHOD,					"method");
+	BuiltinNames.Add(LOCATION_ID,			"location_id");
+	BuiltinNames.Add(MEDIUM,				"medium");
+	BuiltinNames.Add(METHOD,				"method");
 	BuiltinNames.Add(NUMBER_OF_NIGHTS,		"number_of_nights");
 	BuiltinNames.Add(NUMBER_OF_PASSENGERS,	"number_of_passengers");
-	BuiltinNames.Add(NUMBER_OF_ROOMS,			"number_of_rooms");
-	BuiltinNames.Add(ORIGIN,					"origin");
+	BuiltinNames.Add(NUMBER_OF_ROOMS,		"number_of_rooms");
+	BuiltinNames.Add(ORIGIN,				"origin");
 	BuiltinNames.Add(PAYMENT_TYPE,			"payment_type");
 	BuiltinNames.Add(PRICE,					"price");
 	BuiltinNames.Add(PROMOTION_ID,			"promotion_id");
-	BuiltinNames.Add(PROMOTION_NAME,			"promotion_name");
+	BuiltinNames.Add(PROMOTION_NAME,		"promotion_name");
 	BuiltinNames.Add(QUANTITY,				"quantity");
 	BuiltinNames.Add(SCORE,					"score");
 	BuiltinNames.Add(SCREEN_CLASS,			"screen_class");
-	BuiltinNames.Add(SCREEN_NAME,				"screen_name");
-	BuiltinNames.Add(SEARCH_TERM,				"search_term");
+	BuiltinNames.Add(SCREEN_NAME,			"screen_name");
+	BuiltinNames.Add(SEARCH_TERM,			"search_term");
 	BuiltinNames.Add(SHIPPING,				"shipping");
 	BuiltinNames.Add(SHIPPING_TIER,			"shipping_tier");
-	BuiltinNames.Add(SIGN_UP_METHOD,			"sign_up_method");
-	BuiltinNames.Add(SOURCE,					"source");
-	BuiltinNames.Add(START_DATE,				"start_date");
-	BuiltinNames.Add(SUCCESS,					"success");
-	BuiltinNames.Add(TAX,						"tax");
+	BuiltinNames.Add(SIGN_UP_METHOD,		"sign_up_method");
+	BuiltinNames.Add(SOURCE,				"source");
+	BuiltinNames.Add(START_DATE,			"start_date");
+	BuiltinNames.Add(SUCCESS,				"success");
+	BuiltinNames.Add(TAX,					"tax");
 	BuiltinNames.Add(TERM,					"term");
-	BuiltinNames.Add(TRANSACTION_ID,			"transaction_id");
+	BuiltinNames.Add(TRANSACTION_ID,		"transaction_id");
 	BuiltinNames.Add(TRAVEL_CLASS,			"travel_class");
 	BuiltinNames.Add(VALUE,					"value");
 	BuiltinNames.Add(VIRTUAL_CURRENCY_NAME,	"virtual_currency_name");
@@ -505,12 +513,14 @@ JNI_METHOD void Java_com_epicgames_ue4_GameActivity_NativeInitialize(
     SetUserProperty_MethodID				= FindMethod(Env, "AndroidThunkJava_SetUserProperty",				"(Ljava/lang/String;Ljava/lang/String;)V");
 	SetDefaultEventParameters_MethodID		= FindMethod(Env, "AndroidThunkJava_SetDefaultEventParameters",		"(Landroid/os/Bundle;)V");
 	
-	// Find methods in Bundle class
+	//// Find methods in Bundle class
+	ParcelableClassID						= FJavaWrapper::FindClassGlobalRef(Env, "android/os/Parcelable", false);
 	BundleClassID							= FJavaWrapper::FindClassGlobalRef(Env, "android/os/Bundle", false);
-	Bundle_Constructor_MethodID				= FindMethodInSpecificClass(Env, BundleClassID, "<init>",			"()V");
-	Bundle_PutString_MethodID				= FindMethodInSpecificClass(Env, BundleClassID, "putString",		"(Ljava/lang/String;Ljava/lang/String;)V");
-	Bundle_PutFloat_MethodID				= FindMethodInSpecificClass(Env, BundleClassID, "putFloat",			"(Ljava/lang/String;F)V");
-	Bundle_PutInteger_MethodID				= FindMethodInSpecificClass(Env, BundleClassID, "putInt",			"(Ljava/lang/String;I)V");
+	Bundle_Constructor_MethodID				= FindMethodInSpecificClass(Env, BundleClassID, "<init>",				"()V");
+	Bundle_PutString_MethodID				= FindMethodInSpecificClass(Env, BundleClassID, "putString",			"(Ljava/lang/String;Ljava/lang/String;)V");
+	Bundle_PutFloat_MethodID				= FindMethodInSpecificClass(Env, BundleClassID, "putFloat",				"(Ljava/lang/String;F)V");
+	Bundle_PutInteger_MethodID				= FindMethodInSpecificClass(Env, BundleClassID, "putInt",				"(Ljava/lang/String;I)V");
+	Bundle_PutParcelableArray_MethodID		= FindMethodInSpecificClass(Env, BundleClassID, "putParcelableArray",	"(Ljava/lang/String;[Landroid/os/Parcelable;)V");
 }
 
 #endif

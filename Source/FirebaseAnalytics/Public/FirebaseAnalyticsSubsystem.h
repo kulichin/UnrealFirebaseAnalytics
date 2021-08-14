@@ -134,6 +134,7 @@ struct FBundle
 	TMap<FString, FString> StringParameters;
 	TMap<FString, float> FloatParameters;
 	TMap<FString, int> IntegerParameters;
+	TMap<FString, TArray<FBundle>> BundlesParameters;
 };
 
 // TODO: finish up:
@@ -143,7 +144,6 @@ struct FBundle
 //					Home
 //					README
 
-// TODO: add PutArray function for Bundles
 // TODO: add examples
 UCLASS()
 class UFirebaseAnalyticsSubsystem : public UGameInstanceSubsystem
@@ -301,17 +301,17 @@ public:
 	/** Return a built-in event names.
 	 */
 	UFUNCTION(BlueprintCallable, Category="FirebaseAnalytics")
-	static TMap<TEnumAsByte<EBuiltinEventNames>, FName> GetBuiltinEventNames();
+	static TMap<TEnumAsByte<EBuiltinEventNames>, FString> GetBuiltinEventNames();
 
 	/** Return a built-in param names.
 	 */
 	UFUNCTION(BlueprintCallable, Category="FirebaseAnalytics")
-	static TMap<TEnumAsByte<EBuiltinParamNames>, FName> GetBuiltinParamNames();
+	static TMap<TEnumAsByte<EBuiltinParamNames>, FString> GetBuiltinParamNames();
 
 	/** Add a string parameter to Bundle.
 	 *	@param Bundle			Bundle reference
 	 *  @param ParameterName	Name of the parameter to log.
-	 *  @param ParameterValue	Value of the parameter to log.
+	 *  @param ParameterValue	String parameter to log.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "FirebaseAnalytics | Bundle")
 	static void PutString(
@@ -322,7 +322,7 @@ public:
 	/** Add a floating point parameter to Bundle.
 	 *	@param Bundle			Bundle reference
 	 *  @param ParameterName	Name of the parameter to log.
-	 *  @param ParameterValue	Value of the parameter to log.
+	 *  @param ParameterValue	Float parameter to log.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "FirebaseAnalytics | Bundle")
 	static void PutFloat(
@@ -333,11 +333,22 @@ public:
 	/** Add a integer parameter to Bundle.
 	 *	@param Bundle			Bundle reference
 	 *  @param ParameterName	Name of the parameter to log.
-	 *  @param ParameterValue	Value of the parameter to log.
+	 *  @param ParameterValue	Integer parameter to log.
 	 */
 	UFUNCTION(BlueprintCallable, Category="FirebaseAnalytics | Bundle")
 	static void PutInteger(
 		UPARAM(ref) FBundle& Bundle, 
 		const FString& ParameterName, 
 		const int ParameterValue);
+
+	/** Add a bundles array to Bundle.
+	 *	@param Bundle			Bundle reference
+	 *  @param ParameterName	Name of the parameter to log.
+	 *  @param ParameterValue	Array of bundle to log.
+	 */
+	UFUNCTION(BlueprintCallable, Category="FirebaseAnalytics | Bundle")
+	static void PutBundles(
+		UPARAM(ref) FBundle& Bundle, 
+		const FString& ParameterName, 
+		const TArray<FBundle>& ParameterValue);
 };
