@@ -513,7 +513,7 @@ JNI_METHOD void Java_com_epicgames_ue4_GameActivity_NativeInitialize(
     SetUserProperty_MethodID				= FindMethod(Env, "AndroidThunkJava_SetUserProperty",				"(Ljava/lang/String;Ljava/lang/String;)V");
 	SetDefaultEventParameters_MethodID		= FindMethod(Env, "AndroidThunkJava_SetDefaultEventParameters",		"(Landroid/os/Bundle;)V");
 	
-	//// Find methods in Bundle class
+	// Find methods in Bundle class
 	ParcelableClassID						= FJavaWrapper::FindClassGlobalRef(Env, "android/os/Parcelable", false);
 	BundleClassID							= FJavaWrapper::FindClassGlobalRef(Env, "android/os/Bundle", false);
 	Bundle_Constructor_MethodID				= FindMethodInSpecificClass(Env, BundleClassID, "<init>",				"()V");
