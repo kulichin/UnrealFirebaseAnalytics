@@ -143,7 +143,7 @@ struct FBundle
 //					Home
 //					README
 
-// TODO: add 'SetDefaultEventParameters'
+// TODO: add PutArray function for Bundles
 // TODO: add examples
 UCLASS()
 class UFirebaseAnalyticsSubsystem : public UGameInstanceSubsystem
@@ -221,12 +221,18 @@ public:
 	 *						cpp/group/event-names.html#group__event__names) for the list
 	 *  					of reserved event names.
 	 *
-	 *  @param Bundle		Array of FParameter structures.
+	 *  @param Bundle		The map of event parameters. Passing null indicates that the
+	 *						event has no parameters. Parameter names can be up to 40 characters
+	 *						long and must start with an alphabetic character and contain only
+	 *						alphanumeric characters and underscores. String, int and double
+	 *						param types are supported. String parameter values can be
+	 *						up to 100 characters long. The "firebase_", "google_" and "ga_"
+	 *						prefixes are reserved and should not be used for parameter names.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "FirebaseAnalytics")
 	static void LogEventWithParameters(
 		const FString& EventName, 
-		UPARAM(ref) FBundle& Bundle);
+		const FBundle& Bundle);
 
 	/** Clears all analytics data for this app from the device and resets the app instance id. */
 	UFUNCTION(BlueprintCallable, Category = "FirebaseAnalytics")
@@ -272,6 +278,36 @@ public:
 		const FString& PropertyName, 
 		const FString& PropertyValue);
 
+	/** Adds parameters that will be set on every event logged from the SDK,
+	 *	including automatic ones. The values passed in the parameters bundle
+	 *	will be added to the map of default event parameters.
+	 *	These parameters persist across app runs. They are of lower precedence
+	 *	than event parameters, so if an event parameter and a parameter set using
+	 *	this API have the same name, the value of the event
+	 *	parameter will be used.
+	 *	The same limitations on event parameters apply to default event parameters.
+	 *	NOTE: Currently works only with Strings in bundle!
+	 *	
+	 *  @param	Bundle Parameters to be added to the map of parameters added to every event.
+	 *			They will be added to the map of default event parameters, replacing any
+	 *			existing parameter with the same name.
+	 *			Valid parameter values is only Strings.
+	 *			Setting a key's value to null will clear that parameter.
+	 *			Passing in a "" bundle will clear all parameters.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "FirebaseAnalytics")
+	static void SetDefaultEventParameters(const FBundle& Bundle);
+	
+	/** Return a built-in event names.
+	 */
+	UFUNCTION(BlueprintCallable, Category="FirebaseAnalytics")
+	static TMap<TEnumAsByte<EBuiltinEventNames>, FName> GetBuiltinEventNames();
+
+	/** Return a built-in param names.
+	 */
+	UFUNCTION(BlueprintCallable, Category="FirebaseAnalytics")
+	static TMap<TEnumAsByte<EBuiltinParamNames>, FName> GetBuiltinParamNames();
+
 	/** Add a string parameter to Bundle.
 	 *	@param Bundle			Bundle reference
 	 *  @param ParameterName	Name of the parameter to log.
@@ -304,14 +340,4 @@ public:
 		UPARAM(ref) FBundle& Bundle, 
 		const FString& ParameterName, 
 		const int ParameterValue);
-
-	/** Return a built-in event names.
-	 */
-	UFUNCTION(BlueprintCallable, Category="FirebaseAnalytics")
-	static TMap<TEnumAsByte<EBuiltinEventNames>, FName> GetBuiltinEventNames();
-
-	/** Return a built-in param names.
-	 */
-	UFUNCTION(BlueprintCallable, Category="FirebaseAnalytics")
-	static TMap<TEnumAsByte<EBuiltinParamNames>, FName> GetBuiltinParamNames();
 };

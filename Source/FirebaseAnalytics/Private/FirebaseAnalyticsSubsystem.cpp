@@ -17,6 +17,7 @@ static jmethodID SetAnalyticsCollectionEnabled_MethodID;
 static jmethodID SetSessionTimeoutDuration_MethodID;
 static jmethodID SetUserID_MethodID;
 static jmethodID SetUserProperty_MethodID;
+static jmethodID SetDefaultEventParameters_MethodID;
 
 // Bundle methods
 static jmethodID Bundle_Constructor_MethodID;
@@ -31,10 +32,10 @@ static jmethodID FindMethodInSpecificClass(
 	const char* Name, 
 	const char* Signature)
 {
-	//if (Env && Name && Signature && Class)
-	//{
+	if (Env && Name && Signature && Class)
+	{
 		return Env->GetMethodID(Class, Name, Signature);
-	//}
+	}
 
 	return nullptr;
 }
@@ -161,7 +162,7 @@ void UFirebaseAnalyticsSubsystem::LogEventWithIntegerParameter(
 
 void UFirebaseAnalyticsSubsystem::LogEventWithParameters(
 	const FString& EventName, 
-	UPARAM(ref) FBundle& Bundle)
+	const FBundle& Bundle)
 {
 #if PLATFORM_ANDROID
 	if (JNIEnv* Env = FAndroidApplication::GetJavaEnv())
@@ -276,6 +277,65 @@ void UFirebaseAnalyticsSubsystem::SetUserProperty(
 			*JPropertyValue);
 	}
 #endif
+}
+
+void UFirebaseAnalyticsSubsystem::SetDefaultEventParameters(const FBundle& Bundle)
+{
+#if PLATFORM_ANDROID
+	if (JNIEnv* Env = FAndroidApplication::GetJavaEnv())
+	{
+		// Initialize Bundle class
+		auto JBundle = NewScopedJavaObject(Env, Env->NewObject(BundleClassID, Bundle_Constructor_MethodID));
+
+		GEngine->AddOnScreenDebugMessage(-1, 1000.0f, FColor::Red, FString::FromInt(Bundle.StringParameters.Num()));
+		GEngine->AddOnScreenDebugMessage(-1, 1000.0f, FColor::Red, FString::FromInt(Bundle.FloatParameters.Num()));
+		GEngine->AddOnScreenDebugMessage(-1, 1000.0f, FColor::Red, FString::FromInt(Bundle.IntegerParameters.Num()));
+		
+		// Adding string parameter to Bundle
+		for (auto& Parameter : Bundle.StringParameters)
+		{
+		    auto ParameterName = FJavaHelper::ToJavaString(Env, Parameter.Key);
+		    auto ParameterValue = FJavaHelper::ToJavaString(Env, Parameter.Value);
+			
+			CallVoidObjectMethod(
+				Env, 
+				*JBundle, 
+				Bundle_PutString_MethodID, 
+				*ParameterName, 
+				*ParameterValue);
+		}
+
+		// Adding float parameter to Bundle
+		for (auto& Parameter : Bundle.FloatParameters)
+		{
+		    auto ParameterName = FJavaHelper::ToJavaString(Env, Parameter.Key);
+			CallVoidObjectMethod(
+				Env, 
+				*JBundle, 
+				Bundle_PutFloat_MethodID, 
+				*ParameterName, 
+				Parameter.Value);
+		}
+
+		// Adding integer parameter to Bundle
+		for (auto& Parameter : Bundle.IntegerParameters)
+		{
+		    auto ParameterName = FJavaHelper::ToJavaString(Env, Parameter.Key);
+			CallVoidObjectMethod(
+				Env, 
+				*JBundle, 
+				Bundle_PutInteger_MethodID, 
+				*ParameterName, 
+				Parameter.Value);
+		}
+		
+		CallVoidMethod(
+			Env, 
+			SetDefaultEventParameters_MethodID,
+			*JBundle);
+	}
+#endif
+
 }
 
 void UFirebaseAnalyticsSubsystem::PutString(
@@ -443,7 +503,8 @@ JNI_METHOD void Java_com_epicgames_ue4_GameActivity_NativeInitialize(
     SetSessionTimeoutDuration_MethodID		= FindMethod(Env, "AndroidThunkJava_SetSessionTimeoutDuration",		"(I)V");
     SetUserID_MethodID						= FindMethod(Env, "AndroidThunkJava_SetUserID",						"(Ljava/lang/String;)V");
     SetUserProperty_MethodID				= FindMethod(Env, "AndroidThunkJava_SetUserProperty",				"(Ljava/lang/String;Ljava/lang/String;)V");
-
+	SetDefaultEventParameters_MethodID		= FindMethod(Env, "AndroidThunkJava_SetDefaultEventParameters",		"(Landroid/os/Bundle;)V");
+	
 	// Find methods in Bundle class
 	BundleClassID							= FJavaWrapper::FindClassGlobalRef(Env, "android/os/Bundle", false);
 	Bundle_Constructor_MethodID				= FindMethodInSpecificClass(Env, BundleClassID, "<init>",			"()V");
