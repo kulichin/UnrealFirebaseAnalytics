@@ -139,7 +139,6 @@ struct FBundle
 
 // TODO: finish up:
 //					Measure Ecommerce
-//					Log events
 //					Home
 //					README
 
