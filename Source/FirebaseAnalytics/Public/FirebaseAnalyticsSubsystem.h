@@ -137,8 +137,6 @@ struct FBundle
 	TMap<FString, TArray<FBundle>> BundlesParameters;
 };
 
-// TODO: add some boolean to settings
-// TODO: update 'Configure Analytics Data Collection and Usage' wiki page
 UCLASS()
 class UFirebaseAnalyticsSubsystem : public UGameInstanceSubsystem
 {
