@@ -3,6 +3,119 @@
 <root xmlns:android="http://schemas.android.com/apk/res/android"
       xmlns:tools="http://schemas.android.com/tools">
 
+	<init>
+		<setBoolFromProperty
+			result="bPermanentlyDeactivateCollection"
+			ini="Engine"
+			section="/Script/FirebaseAnalytics.FirebaseAnalyticsSettings"
+			property="bPermanentlyDeactivateCollection"
+			default="false" />
+
+		<setBoolFromProperty
+			result="bEnableAnalyticsCollection"
+			ini="Engine"
+			section="/Script/FirebaseAnalytics.FirebaseAnalyticsSettings"
+			property="bEnableAnalyticsCollection"
+			default="true" />
+
+		<setBoolFromProperty
+			result="bEnableAdvertisingIDCollection"
+			ini="Engine"
+			section="/Script/FirebaseAnalytics.FirebaseAnalyticsSettings"
+			property="bEnableAdvertisingIDCollection"
+			default="false" />
+
+		<setBoolFromProperty
+			result="bEnableSSAIDCollection"
+			ini="Engine"
+			section="/Script/FirebaseAnalytics.FirebaseAnalyticsSettings"
+			property="bEnableSSAIDCollection"
+			default="false" />
+
+		<setBoolFromProperty
+			result="bAllowAdPersonalizationSignals"
+			ini="Engine"
+			section="/Script/FirebaseAnalytics.FirebaseAnalyticsSettings"
+			property="bAllowAdPersonalizationSignals"
+			default="false" />
+
+	</init>
+
+	<!-- Add additional Facebook info into manifest file -->
+	<androidManifestUpdates>
+
+		<!-- bEnableAnalyticsCollection -->
+		<if condition="bEnableAnalyticsCollection">
+			<true>
+				<addElements tag="application">
+					<meta-data android:name="firebase_analytics_collection_enabled" android:value="true" />
+				</addElements>
+			</true>
+			<false>
+				<addElements tag="application">
+					<meta-data android:name="firebase_analytics_collection_enabled" android:value="false" />
+				</addElements>
+			</false>
+		</if>
+
+		<!-- bPermanentlyDeactivateCollection -->
+		<if condition="bPermanentlyDeactivateCollection ">
+			<true>
+				<addElements tag="application">
+					<meta-data android:name="firebase_analytics_collection_deactivated" android:value="true" />
+				</addElements>
+			</true>
+			<false>
+				<addElements tag="application">
+					<meta-data android:name="firebase_analytics_collection_deactivated" android:value="false" />
+				</addElements>
+			</false>
+		</if>
+
+		<!-- bEnableAdvertisingIDCollection -->
+		<if condition="bEnableAdvertisingIDCollection">
+			<true>
+				<addElements tag="application">
+					<meta-data android:name="google_analytics_adid_collection_enabled" android:value="true" />
+				</addElements>
+			</true>
+			<false>
+				<addElements tag="application">
+					<meta-data android:name="google_analytics_adid_collection_enabled" android:value="false" />
+				</addElements>
+			</false>
+		</if>
+
+		<!-- bEnableSSAIDCollection -->
+		<if condition="bEnableSSAIDCollection">
+			<true>
+				<addElements tag="application">
+					<meta-data android:name="google_analytics_ssaid_collection_enabled" android:value="true" />
+				</addElements>
+			</true>
+			<false>
+				<addElements tag="application">
+					<meta-data android:name="google_analytics_ssaid_collection_enabled" android:value="false" />
+				</addElements>
+			</false>
+		</if>
+
+		<!-- bAllowAdPersonalizationSignals -->
+		<if condition="bAllowAdPersonalizationSignals">
+			<true>
+				<addElements tag="application">
+					<meta-data android:name="google_analytics_default_allow_ad_personalization_signals" android:value="true" />
+				</addElements>
+			</true>
+			<false>
+				<addElements tag="application">
+					<meta-data android:name="google_analytics_default_allow_ad_personalization_signals" android:value="false" />
+				</addElements>
+			</false>
+		</if>
+
+	</androidManifestUpdates>
+
 	<!-- Copy google-services.json -->
 	<prebuildCopies>
 		<copyFile src="$S(PluginDir)/../../../../Build/Android/google-services.json"
