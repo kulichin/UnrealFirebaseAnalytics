@@ -7,7 +7,7 @@
 #include "FirebaseAnalyticsSubsystem.generated.h"
 
 UENUM(Blueprintable)
-enum EBuiltinParamNames
+enum class EBuiltinParamNames : uint8
 {
 	ACHIEVEMENT_ID,
 	ACLID,
@@ -82,7 +82,7 @@ enum EBuiltinParamNames
 };
 
 UENUM(Blueprintable)
-enum EBuiltinEventNames
+enum class EBuiltinEventNames : uint8
 {
 	ADD_PAYMENT_INFO,
 	ADD_SHIPPING_INFO,
@@ -293,12 +293,12 @@ public:
 	/** Return a built-in event names.
 	 */
 	UFUNCTION(BlueprintCallable, Category="FirebaseAnalytics")
-	static TMap<TEnumAsByte<EBuiltinEventNames>, FString> GetBuiltinEventNames();
+	static TMap<EBuiltinEventNames, FString> GetBuiltinEventNames();
 
 	/** Return a built-in param names.
 	 */
 	UFUNCTION(BlueprintCallable, Category="FirebaseAnalytics")
-	static TMap<TEnumAsByte<EBuiltinParamNames>, FString> GetBuiltinParamNames();
+	static TMap<EBuiltinParamNames, FString> GetBuiltinParamNames();
 
 	/** Add a string parameter to Bundle.
 	 *	@param Bundle			Bundle reference
