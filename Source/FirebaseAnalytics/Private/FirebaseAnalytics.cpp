@@ -15,7 +15,7 @@ void FFirebaseAnalyticsModule::StartupModule()
 			TEXT("Plugins"), 
 			TEXT("Firebase Analytics"),
 			LOCTEXT("Firebase Analytics", "Firebase Analytics"), 
-			LOCTEXT("Facebook", "Settings for Facebook Authentication"),
+			LOCTEXT("Firebase Analytics", "Settings for Firebase Analytics"),
 			GetMutableDefault<UFirebaseAnalyticsSettings>());
 	}
 }
