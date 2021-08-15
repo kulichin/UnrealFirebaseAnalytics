@@ -17,7 +17,7 @@
 	"Modules": [
 		{
 			"Name": "FirebaseAnalytics",
-			"Type": "Developer",
+			"Type": "DeveloperTool",
 			"LoadingPhase": "Default"
 		}
 	]

@@ -137,7 +137,6 @@ struct FBundle
 	TMap<FString, TArray<FBundle>> BundlesParameters;
 };
 
-// TODO: add examples
 UCLASS()
 class UFirebaseAnalyticsSubsystem : public UGameInstanceSubsystem
 {
