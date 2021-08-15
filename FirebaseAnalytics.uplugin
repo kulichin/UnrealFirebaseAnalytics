@@ -3,7 +3,7 @@
 	"Version": 1,
 	"VersionName": "1.0",
 	"FriendlyName": "FirebaseAnalytics",
-	"Description": "Firebase Authentication plugin for Unreal Engine provides various methods for logging a user actions.",
+	"Description": "Firebase Analytics plugin for Unreal Engine provides various methods for logging a user actions.",
 	"Category": "Android",
 	"CreatedBy": "Nikita Klimov",
 	"CreatedByURL": "https://github.com/kulichin",

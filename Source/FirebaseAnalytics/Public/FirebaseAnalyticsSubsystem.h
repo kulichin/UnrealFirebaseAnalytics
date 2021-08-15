@@ -137,11 +137,6 @@ struct FBundle
 	TMap<FString, TArray<FBundle>> BundlesParameters;
 };
 
-// TODO: finish up:
-//					Measure Ecommerce
-//					Home
-//					README
-
 // TODO: add examples
 UCLASS()
 class UFirebaseAnalyticsSubsystem : public UGameInstanceSubsystem
