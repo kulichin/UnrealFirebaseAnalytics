@@ -8,17 +8,23 @@
 	"CreatedBy": "Nikita Klimov",
 	"CreatedByURL": "https://github.com/kulichin",
 	"DocsURL": "https://github.com/kulichin/UnrealFirebaseAnalytics/wiki",
-	"MarketplaceURL": "",
+	"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/product/2a6af776ec8a493b9fac74cf31503682",
 	"SupportURL": "https://github.com/kulichin/UnrealFirebaseAnalytics/issues",
 	"CanContainContent": true,
 	"IsBetaVersion": true,
 	"IsExperimentalVersion": false,
 	"Installed": false,
+	"EngineVersion": "4.26.0",
 	"Modules": [
 		{
 			"Name": "FirebaseAnalytics",
-			"Type": "DeveloperTool",
-			"LoadingPhase": "Default"
+			"Type": "Runtime",
+			"LoadingPhase": "Default",
+			"WhitelistPlatforms": [
+				"Win64",
+				"Mac",
+				"Android"
+			]
 		}
 	]
 }
