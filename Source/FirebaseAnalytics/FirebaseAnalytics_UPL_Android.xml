@@ -43,7 +43,6 @@
 
 	<!-- Add additional Facebook info into manifest file -->
 	<androidManifestUpdates>
-
 		<!-- bEnableAnalyticsCollection -->
 		<if condition="bEnableAnalyticsCollection">
 			<true>
@@ -169,11 +168,14 @@
 	<AARImports>
 		<insertValue value="com.google.firebase,firebase-analytics,19.0.0" />
 		<insertNewline />
+		
+		<insertValue value="com.google.android.gms,play-services-ads,16.0.0" />
+		<insertNewline />
 
-		<replace find="play-services-auth,11.8.0"   with="play-services-auth,19.2.0" />
-		<replace find="play-services-games,11.8.0"  with="play-services-games,21.0.0" />
-		<replace find="play-services-nearby,11.8.0" with="play-services-nearby,18.0.0" />
-		<replace find="play-services-plus,11.8.0"   with="play-services-plus,17.0.0" />
+		<replace find="play-services-auth,11.8.0"   with="play-services-auth,16.0.1" />
+		<replace find="play-services-games,11.8.0"  with="play-services-games,16.0.0" />
+		<replace find="play-services-nearby,11.8.0" with="play-services-nearby,16.0.0" />
+		<replace find="play-services-plus,11.8.0"   with="play-services-plus,16.0.0" />
 	</AARImports>
 
 	<!-- Gradle additions -->
@@ -189,6 +191,7 @@
 	<!-- Gradle additions -->
 	<buildGradleAdditions>
 		<insert>
+		apply plugin: 'com.android.application'
 			apply plugin: 'com.google.gms.google-services'
 			android
 			{
