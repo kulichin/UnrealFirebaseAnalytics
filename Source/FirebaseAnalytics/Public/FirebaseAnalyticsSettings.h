@@ -11,19 +11,19 @@ class UFirebaseAnalyticsSettings : public UObject
 {
 	GENERATED_BODY()
 
-	UPROPERTY(Config, EditAnywhere)
+	UPROPERTY(Config, EditAnywhere, Category = "Firebase Analytics")
 	bool bPermanentlyDeactivateCollection = false;
 	
-	UPROPERTY(Config, EditAnywhere)
+	UPROPERTY(Config, EditAnywhere, Category = "Firebase Analytics")
 	bool bEnableAnalyticsCollection = true;
 
-	UPROPERTY(Config, EditAnywhere)
+	UPROPERTY(Config, EditAnywhere, Category = "Firebase Analytics")
 	bool bEnableAdvertisingIDCollection = false;
 
-	UPROPERTY(Config, EditAnywhere)
+	UPROPERTY(Config, EditAnywhere, Category = "Firebase Analytics")
 	bool bEnableSSAIDCollection = false;
 
-	UPROPERTY(Config, EditAnywhere)
+	UPROPERTY(Config, EditAnywhere, Category = "Firebase Analytics")
 	bool bAllowAdPersonalizationSignals = false;
 	
 #if WITH_EDITOR
