@@ -207,9 +207,10 @@
 	<!-- Keep analytics functions -->
 	<proguardAdditions>
 		<insert>
-			-keep class com.epicgames.ue4.GameActivity 
+			-keep class com.epicgames.unreal.GameActivity 
 			{
-				void NativeInitialize(java.lang.Class);
+				void NativeInitialize();
+				static native void NativeInitialize();
 				void FirebaseAnalyticsInitialize();
 				void AndroidThunkJava_LogEvent(java.lang.String);
 				void AndroidThunkJava_LogEventWithParameter(java.lang.String, java.lang.String, java.lang.String);

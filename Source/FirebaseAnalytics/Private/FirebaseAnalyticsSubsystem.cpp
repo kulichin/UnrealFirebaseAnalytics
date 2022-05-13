@@ -496,7 +496,7 @@ TMap<EBuiltinParamNames, FString> UFirebaseAnalyticsSubsystem::GetBuiltinParamNa
 
 #if PLATFORM_ANDROID
 
-JNI_METHOD void Java_com_epicgames_ue4_GameActivity_NativeInitialize(
+JNI_METHOD void Java_com_epicgames_unreal_GameActivity_NativeInitialize(
 	JNIEnv* Env,
 	jobject Thiz)
 {
